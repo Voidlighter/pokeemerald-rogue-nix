@@ -22,10 +22,14 @@
           pkgs = import nixpkgs-gcc12 { inherit system; };
           hostCompiler = pkgs.gcc12;
           armToolchain = (import nixpkgs { inherit system; }).pkgsCross.arm-embedded.stdenv.cc;
+          makeWithNixShell = pkgs.writeShellScriptBin "make" ''
+            exec ${pkgs.gnumake}/bin/make 'SHELL=${pkgs.bash}/bin/bash -o pipefail' "$@"
+          '';
         in {
           default = (pkgs.mkShell.override { stdenv = pkgs.gcc12Stdenv; }) {
             packages = with pkgs; [
-              gnumake
+              bash
+              makeWithNixShell
               git
               perl
               wget
